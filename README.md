@@ -6,7 +6,7 @@
 
 TaskFlow AI Assistant is a production-ready, AI-powered task management platform built to showcase modern full-stack development capabilities. This project demonstrates advanced architectural patterns, AI integration, and real-time collaboration features using industry-standard technologies.
 
-**Live Demo**: _Coming Soon - Deploying to Vercel_  
+**Live Demo**: https://taskflow-ai-assistant.vercel.app/  
 **GitHub**: https://github.com/Escobar-Luis/taskflow-ai-assistant
 
 ## 🎯 Strategic Purpose
