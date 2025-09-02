@@ -8,6 +8,8 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth";
 
 // ============================================================================
 // 1. INTERFACES & TYPE DEFINITIONS - Context and middleware types
@@ -16,6 +18,8 @@ import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
 export interface Context {
   userId?: string;
   userEmail?: string;
+  userName?: string;
+  userImage?: string;
   req?: CreateNextContextOptions["req"];
   res?: CreateNextContextOptions["res"];
 }
@@ -43,21 +47,20 @@ const t = initTRPC.context<Context>().create({
 // 3. STATE MANAGEMENT - Context creation and authentication
 // ============================================================================
 
-// WHY: Create context with user authentication and request/response objects
+// WHY: Create context with NextAuth session and request/response objects
 export const createTRPCContext = async (
   opts: CreateNextContextOptions
 ): Promise<Context> => {
   const { req, res } = opts;
 
-  // TODO: Implement proper authentication
-  // For now, mock user authentication for demonstration
-  const mockUserId = (req.headers["x-user-id"] as string) || "user_demo";
-  const mockUserEmail =
-    (req.headers["x-user-email"] as string) || "demo@taskflow.ai";
+  // WHY: Get NextAuth session for authenticated user context
+  const session = await getServerSession(req, res, authOptions);
 
   return {
-    userId: mockUserId,
-    userEmail: mockUserEmail,
+    userId: session?.user?.id,
+    userEmail: session?.user?.email ?? undefined,
+    userName: session?.user?.name ?? undefined,
+    userImage: session?.user?.image ?? undefined,
     req,
     res,
   };
@@ -72,15 +75,17 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.userId || !ctx.userEmail) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "User must be authenticated to access this resource",
+      message: "You must be signed in to access this resource",
     });
   }
   return next({
     ctx: {
       ...ctx,
-      // Ensure userId and userEmail are defined
+      // Ensure userId and userEmail are defined for protected procedures
       userId: ctx.userId,
       userEmail: ctx.userEmail,
+      userName: ctx.userName,
+      userImage: ctx.userImage,
     },
   });
 });
