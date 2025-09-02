@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+.vercel
+*.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+*.tsbuildinfo
+next-env.d.ts
+public/
+CHANGELOG.md
